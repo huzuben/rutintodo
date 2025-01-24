@@ -1,0 +1,182 @@
+@* Toast Bildirimleri *@
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="basariliToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>
+                <span id="basariliMesaj"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Kapat"></button>
+        </div>
+    </div>
+    
+    <div id="hataToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-x-circle me-2"></i>
+                <span id="hataMesaj"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Kapat"></button>
+        </div>
+    </div>
+</div>
+
+@* Yükleme Göstergesi *@
+<div id="yukleniyorSpinner" class="position-fixed top-50 start-50 translate-middle" style="z-index: 1060; display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@* İskelet Yükleme Ekranı *@
+<template id="iskeletSablon">
+    <div class="card bg-dark text-white shadow-lg mb-4 iskelet-kart">
+        <div class="card-body">
+            <div class="iskelet-cizgi w-75"></div>
+            <div class="iskelet-cizgi w-100"></div>
+            <div class="iskelet-cizgi w-50"></div>
+        </div>
+    </div>
+</template>
+
+<style>
+    /* Toast Animasyonları */
+    .toast.show {
+        animation: kaydir 0.3s ease-out;
+    }
+    
+    .toast.hide {
+        animation: kaydir-geri 0.3s ease-in;
+    }
+    
+    @@keyframes kaydir {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+    
+    @@keyframes kaydir-geri {
+        from { transform: translateX(0); }
+        to { transform: translateX(100%); }
+    }
+    
+    /* İskelet Yükleme Animasyonları */
+    .iskelet-kart {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .iskelet-cizgi {
+        height: 20px;
+        margin: 10px 0;
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: parlama 1.5s infinite;
+        border-radius: 4px;
+    }
+    
+    @@keyframes parlama {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    
+    /* İpucu Stilleri */
+    [data-ipucu] {
+        position: relative;
+        cursor: help;
+    }
+    
+    [data-ipucu]:before {
+        content: attr(data-ipucu);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border-radius: 4px;
+        font-size: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    [data-ipucu]:hover:before {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-5px);
+    }
+    
+    /* Mikro-animasyonlar */
+    .btn {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<script>
+    // Toast bildirimleri için yardımcı fonksiyonlar
+    function basariliToastGoster(mesaj) {
+        const toast = new bootstrap.Toast(document.getElementById('basariliToast'));
+        document.getElementById('basariliMesaj').textContent = mesaj;
+        toast.show();
+    }
+    
+    function hataToastGoster(mesaj) {
+        const toast = new bootstrap.Toast(document.getElementById('hataToast'));
+        document.getElementById('hataMesaj').textContent = mesaj;
+        toast.show();
+    }
+    
+    // Yükleme göstergesi için yardımcı fonksiyonlar
+    function yuklemeGoster() {
+        document.getElementById('yukleniyorSpinner').style.display = 'block';
+    }
+    
+    function yuklemeGizle() {
+        document.getElementById('yukleniyorSpinner').style.display = 'none';
+    }
+    
+    // İskelet yükleme ekranı için yardımcı fonksiyonlar
+    function iskeletYuklemeGoster(kapsayici, adet = 3) {
+        const sablon = document.getElementById('iskeletSablon');
+        kapsayici.innerHTML = '';
+        
+        for (let i = 0; i < adet; i++) {
+            kapsayici.appendChild(sablon.content.cloneNode(true));
+        }
+    }
+    
+    // AJAX istekleri için yakalayıcı
+    let orjinalFetch = window.fetch;
+    window.fetch = function() {
+        yuklemeGoster();
+        return orjinalFetch.apply(this, arguments)
+            .then(yanit => {
+                yuklemeGizle();
+                return yanit;
+            })
+            .catch(hata => {
+                yuklemeGizle();
+                hataToastGoster('Bir hata oluştu: ' + hata.mesaj);
+                throw hata;
+            });
+    }
+</script> 

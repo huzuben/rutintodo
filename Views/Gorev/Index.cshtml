@@ -1,0 +1,421 @@
+@model IEnumerable<todolist.Models.Gorev>
+
+@{
+    ViewData["Title"] = "Görevler";
+    var tamamlananGorevSayisi = Model.Count(g => g.Tamamlandi);
+    var bekleyenGorevSayisi = Model.Count(g => !g.Tamamlandi);
+    var yuksekOncelikliGorevSayisi = Model.Count(g => g.OncelikDurumu == todolist.Models.Oncelik.Yüksek);
+    var ortaOncelikliGorevSayisi = Model.Count(g => g.OncelikDurumu == todolist.Models.Oncelik.Orta);
+    var dusukOncelikliGorevSayisi = Model.Count(g => g.OncelikDurumu == todolist.Models.Oncelik.Düşük);
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Önemli Görevler Widget'ı -->
+        <div class="col-12 mb-4">
+            <div class="card bg-dark border-danger shadow-lg">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Önemli Görevler</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var onemliGorevler = Model
+                            .Where(g => !g.Tamamlandi && g.OncelikDurumu == todolist.Models.Oncelik.Yüksek)
+                            .OrderBy(g => g.SonTarih)
+                            .Take(3);
+
+                        if (!onemliGorevler.Any())
+                        {
+                            <p class="text-muted mb-0">Şu anda önemli görev bulunmuyor.</p>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var gorev in onemliGorevler)
+                                {
+                                    <div class="list-group-item bg-dark text-white border-danger">
+                                        <h6 class="mb-1">@gorev.Baslik</h6>
+                                        <p class="mb-1 text-muted">@gorev.Aciklama</p>
+                                        <small class="text-danger">
+                                            <i class="bi bi-clock"></i>
+                                            Son Tarih: @gorev.SonTarih?.ToString("dd.MM.yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Ana Görev Listesi -->
+        <div class="col-12 mb-4">
+            <div class="card bg-dark shadow-lg">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-list-check me-2"></i>Görevlerim
+                    </h5>
+                    <a asp-action="Olustur" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-lg"></i> Yeni Görev
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-clipboard-check display-1 text-muted"></i>
+                            <h5 class="text-muted mt-3">Henüz görev eklenmemiş</h5>
+                            <p class="text-muted">İlk görevinizi eklemek için "Yeni Görev" butonuna tıklayın.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in Model.OrderByDescending(t => t.OlusturulmaTarihi))
+                            {
+                                <div class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                                    <div class="me-auto">
+                                        <div class="d-flex align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" @(item.Tamamlandi ? "checked" : "") 
+                                                       onchange="gorevDurumunuGuncelle(@item.Id, this.checked)"
+                                                       id="gorev-@item.Id">
+                                            </div>
+                                            <div class="ms-3">
+                                                <h6 class="mb-1 @(item.Tamamlandi ? "text-decoration-line-through" : "")">
+                                                    @item.Baslik
+                                                    @{
+                                                        var badge = item.OncelikDurumu switch
+                                                        {
+                                                            todolist.Models.Oncelik.Yüksek => "danger",
+                                                            todolist.Models.Oncelik.Orta => "warning",
+                                                            _ => "info"
+                                                        };
+                                                    }
+                                                    <span class="badge bg-@badge">@item.OncelikDurumu</span>
+                                                </h6>
+                                                <p class="mb-1 text-muted">@item.Aciklama</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i>
+                                                    Son Tarih: @item.SonTarih?.ToString("dd.MM.yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3 d-flex gap-2">
+                                        <a asp-action="Duzenle" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button onclick="gorevSil(@item.Id)" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- İstatistik Grafiği Widget'ı -->
+        <div class="col-12 mb-4">
+            <div class="card bg-dark shadow-lg">
+                <div class="card-header">
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-graph-up me-2"></i>Görev İstatistikleri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="gorevDurumuChart" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="oncelikDagilimChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Görev Durumu Grafiği
+        const gorevDurumuCtx = document.getElementById('gorevDurumuChart').getContext('2d');
+        new Chart(gorevDurumuCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Tamamlanan', 'Bekleyen'],
+                datasets: [{
+                    data: [@tamamlananGorevSayisi, @bekleyenGorevSayisi],
+                    backgroundColor: ['#198754', '#dc3545'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#fff'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Görev Durumu',
+                        color: '#fff'
+                    }
+                }
+            }
+        });
+
+        // Öncelik Dağılımı Grafiği
+        const oncelikDagilimCtx = document.getElementById('oncelikDagilimChart').getContext('2d');
+        new Chart(oncelikDagilimCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Yüksek', 'Orta', 'Düşük'],
+                datasets: [{
+                    label: 'Görev Sayısı',
+                    data: [@yuksekOncelikliGorevSayisi, @ortaOncelikliGorevSayisi, @dusukOncelikliGorevSayisi],
+                    backgroundColor: ['#dc3545', '#ffc107', '#0dcaf0'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Öncelik Dağılımı',
+                        color: '#fff'
+                    }
+                }
+            }
+        });
+
+        function gorevDurumunuGuncelle(gorevId, tamamlandi) {
+            $.post(`/Gorev/DurumGuncelle/${gorevId}`, { tamamlandi: tamamlandi })
+                .done(function () {
+                    basariliToastGoster('Görev durumu güncellendi');
+                    setTimeout(() => window.location.reload(), 1000);
+                })
+                .fail(function () {
+                    hataToastGoster('Görev durumu güncellenirken bir hata oluştu');
+                });
+        }
+
+        function gorevSil(gorevId) {
+            if (confirm('Bu görevi silmek istediğinizden emin misiniz?')) {
+                $.post(`/Gorev/Sil/${gorevId}`)
+                    .done(function () {
+                        basariliToastGoster('Görev başarıyla silindi');
+                        setTimeout(() => window.location.reload(), 1000);
+                    })
+                    .fail(function () {
+                        hataToastGoster('Görev silinirken bir hata oluştu');
+                    });
+            }
+        }
+    </script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .card {
+            border: none;
+            border-radius: 15px;
+            background-color: #222221;
+        }
+
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: none;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-card {
+            display: flex;
+            background-color: #2a2a29;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .task-priority-indicator {
+            width: 4px;
+            background-color: #666;
+        }
+
+        .task-card[data-priority="yüksek"] .task-priority-indicator {
+            background-color: #dc3545;
+        }
+
+        .task-card[data-priority="orta"] .task-priority-indicator {
+            background-color: #ffc107;
+        }
+
+        .task-card[data-priority="düşük"] .task-priority-indicator {
+            background-color: #0dcaf0;
+        }
+
+        .task-content {
+            flex: 1;
+            padding: 1rem;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-title {
+            flex: 1;
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .task-description {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            margin-left: 2rem;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-left: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .task-dates {
+            display: flex;
+            color: #888;
+        }
+
+        .task-date {
+            display: flex;
+            align-items: center;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .task-card:hover .task-actions {
+            opacity: 1;
+        }
+
+        .task-action-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .task-action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .priority-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .task-card[data-priority="yüksek"] .priority-badge {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .task-card[data-priority="orta"] .priority-badge {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .task-card[data-priority="düşük"] .priority-badge {
+            background-color: rgba(13, 202, 240, 0.2);
+            color: #0dcaf0;
+        }
+
+        .task-card.completed {
+            opacity: 0.7;
+        }
+
+        .task-card.completed .task-priority-indicator {
+            background-color: #198754;
+        }
+
+        .task-card.overdue .task-priority-indicator {
+            background-color: #dc3545;
+        }
+
+        .form-check-input {
+            cursor: pointer;
+            width: 1.2rem;
+            height: 1.2rem;
+            margin-top: 0.2rem;
+        }
+
+        .form-check-input:checked {
+            background-color: #198754;
+            border-color: #198754;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-card {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+} 

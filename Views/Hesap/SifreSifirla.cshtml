@@ -1,0 +1,58 @@
+@model todolist.Models.ViewModels.SifreSifirlamaViewModel
+@{
+    ViewData["Title"] = "Şifre Sıfırla";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark shadow-lg">
+                <div class="card-header">
+                    <h4 class="text-white mb-0">Şifre Sıfırla</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="SifreSifirla" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="KullaniciAdi" class="form-label text-white"></label>
+                            <input asp-for="KullaniciAdi" class="form-control" placeholder="Kullanıcı adınızı giriniz" />
+                            <span asp-validation-for="KullaniciAdi" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Eposta" class="form-label text-white"></label>
+                            <input asp-for="Eposta" class="form-control" placeholder="E-posta adresinizi giriniz" />
+                            <span asp-validation-for="Eposta" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="YeniSifre" class="form-label text-white"></label>
+                            <input asp-for="YeniSifre" class="form-control" placeholder="Yeni şifrenizi giriniz" />
+                            <span asp-validation-for="YeniSifre" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="YeniSifreTekrar" class="form-label text-white"></label>
+                            <input asp-for="YeniSifreTekrar" class="form-control" placeholder="Yeni şifrenizi tekrar giriniz" />
+                            <span asp-validation-for="YeniSifreTekrar" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-key"></i> Şifreyi Sıfırla
+                            </button>
+                            <a asp-action="Giris" class="btn btn-outline-light">
+                                <i class="bi bi-arrow-left"></i> Giriş Sayfasına Dön
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

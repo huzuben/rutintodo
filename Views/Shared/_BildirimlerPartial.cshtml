@@ -1,0 +1,67 @@
+@model List<todolist.Models.Bildirim>
+
+@if (!Model.Any())
+{
+    <div class="text-center p-3">
+        <i class="bi bi-bell-slash fs-4"></i>
+        <p class="mb-0 mt-2">Bildirim bulunmuyor</p>
+    </div>
+}
+else
+{
+    <div class="notification-list">
+        @foreach (var bildirim in Model.Take(5))
+        {
+            <a href="#" class="dropdown-item d-flex align-items-center py-2 @(!bildirim.Okundu ? "bg-light" : "")" onclick="bildirimOkunduOlarakIsaretle(@bildirim.Id); return false;">
+                @{
+                    var icon = bildirim.Tip switch
+                    {
+                        BildirimTipi.Hatirlatma => "bi-alarm",
+                        BildirimTipi.GorevTamamlandi => "bi-check-circle",
+                        BildirimTipi.GorevGecikti => "bi-exclamation-triangle",
+                        BildirimTipi.YeniGorev => "bi-plus-circle",
+                        _ => "bi-bell"
+                    };
+                }
+                <div class="icon-circle bg-dark text-white rounded-circle p-2 me-2">
+                    <i class="bi @icon"></i>
+                </div>
+                <div class="notification-content flex-grow-1">
+                    <div class="small fw-bold">@bildirim.Mesaj</div>
+                    @if (!string.IsNullOrEmpty(bildirim.Detay))
+                    {
+                        <div class="text-muted smaller">@bildirim.Detay</div>
+                    }
+                    <div class="text-muted smallest">@bildirim.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm")</div>
+                </div>
+            </a>
+        }
+        @if (Model.Count > 5)
+        {
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item text-center small text-primary" asp-controller="Bildirim" asp-action="Index">
+                Tüm Bildirimleri Görüntüle
+            </a>
+        }
+    </div>
+}
+
+<style>
+    .notification-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .icon-circle {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .smallest {
+        font-size: 0.7rem;
+    }
+    .smaller {
+        font-size: 0.8rem;
+    }
+</style> 

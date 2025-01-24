@@ -1,0 +1,72 @@
+@model todolist.Models.ViewModels.KayitViewModel
+
+@{
+    ViewData["Title"] = "Kayıt";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark shadow-lg">
+                <div class="card-header">
+                    <h3 class="text-white mb-0">Hesap Oluştur</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Kayit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="KullaniciAdi" class="form-label text-white"></label>
+                            <input asp-for="KullaniciAdi" class="form-control" />
+                            <span asp-validation-for="KullaniciAdi" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Eposta" class="form-label text-white"></label>
+                            <input asp-for="Eposta" class="form-control" />
+                            <span asp-validation-for="Eposta" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Ad" class="form-label text-white"></label>
+                            <input asp-for="Ad" class="form-control" />
+                            <span asp-validation-for="Ad" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Soyad" class="form-label text-white"></label>
+                            <input asp-for="Soyad" class="form-control" />
+                            <span asp-validation-for="Soyad" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Sifre" class="form-label text-white"></label>
+                            <input asp-for="Sifre" class="form-control" />
+                            <span asp-validation-for="Sifre" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SifreTekrar" class="form-label text-white"></label>
+                            <input asp-for="SifreTekrar" class="form-control" />
+                            <span asp-validation-for="SifreTekrar" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Kayıt Ol
+                            </button>
+                            <a asp-action="Giris" class="btn btn-outline-light">
+                                <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

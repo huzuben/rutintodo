@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <img src="~/images/logo.png" alt="Rutin Logo" class="img-fluid mb-4" style="max-width: 200px;">
+            <h1 class="display-4 mb-4">Rutin'e Hoş Geldiniz</h1>
+            <p class="lead">Görevlerinizi düzenleyin ve verimliliğinizi artırın.</p>
+            <div class="mt-4">
+                <a asp-controller="Todo" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="bi bi-list-check"></i> Görevlerimi Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

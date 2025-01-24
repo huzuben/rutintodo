@@ -1,0 +1,273 @@
+@model todolist.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Görev Panosu</h4>
+                <div>
+                    <a asp-action="Olustur" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Yeni Görev
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Bekleyen Görevler -->
+        <div class="col-md-3">
+            <div class="kanban-column">
+                <div class="kanban-header bg-warning bg-opacity-10">
+                    <h5 class="text-warning mb-0">
+                        <i class="bi bi-hourglass-split"></i>
+                        Bekleyen
+                        <span class="badge bg-warning ms-2">@Model.BekleyenGorevler.Count</span>
+                    </h5>
+                </div>
+                <div class="kanban-body">
+                    @foreach (var gorev in Model.BekleyenGorevler)
+                    {
+                        <div class="kanban-item" data-priority="@gorev.OncelikDurumu.ToString().ToLower()">
+                            <div class="priority-indicator"></div>
+                            <div class="kanban-item-content">
+                                <h6 class="mb-2">@gorev.Baslik</h6>
+                                <p class="small text-muted mb-2">@gorev.Aciklama</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge priority-badge">@gorev.OncelikDurumu</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-event"></i>
+                                        @(gorev.SonTarih?.ToString("dd.MM.yyyy") ?? "Tarih Yok")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Devam Eden Görevler -->
+        <div class="col-md-3">
+            <div class="kanban-column">
+                <div class="kanban-header bg-primary bg-opacity-10">
+                    <h5 class="text-primary mb-0">
+                        <i class="bi bi-play-circle"></i>
+                        Devam Eden
+                        <span class="badge bg-primary ms-2">@Model.DevamEdenGorevler.Count</span>
+                    </h5>
+                </div>
+                <div class="kanban-body">
+                    @foreach (var gorev in Model.DevamEdenGorevler)
+                    {
+                        <div class="kanban-item" data-priority="@gorev.OncelikDurumu.ToString().ToLower()">
+                            <div class="priority-indicator"></div>
+                            <div class="kanban-item-content">
+                                <h6 class="mb-2">@gorev.Baslik</h6>
+                                <p class="small text-muted mb-2">@gorev.Aciklama</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge priority-badge">@gorev.OncelikDurumu</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-event"></i>
+                                        @(gorev.SonTarih?.ToString("dd.MM.yyyy") ?? "Tarih Yok")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Gecikmiş Görevler -->
+        <div class="col-md-3">
+            <div class="kanban-column">
+                <div class="kanban-header bg-danger bg-opacity-10">
+                    <h5 class="text-danger mb-0">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Gecikmiş
+                        <span class="badge bg-danger ms-2">@Model.GecikmisGorevler.Count</span>
+                    </h5>
+                </div>
+                <div class="kanban-body">
+                    @foreach (var gorev in Model.GecikmisGorevler)
+                    {
+                        <div class="kanban-item" data-priority="@gorev.OncelikDurumu.ToString().ToLower()">
+                            <div class="priority-indicator"></div>
+                            <div class="kanban-item-content">
+                                <h6 class="mb-2">@gorev.Baslik</h6>
+                                <p class="small text-muted mb-2">@gorev.Aciklama</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge priority-badge">@gorev.OncelikDurumu</span>
+                                    <small class="text-danger">
+                                        <i class="bi bi-calendar-event"></i>
+                                        @(gorev.SonTarih?.ToString("dd.MM.yyyy") ?? "Tarih Yok")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Tamamlanan Görevler -->
+        <div class="col-md-3">
+            <div class="kanban-column">
+                <div class="kanban-header bg-success bg-opacity-10">
+                    <h5 class="text-success mb-0">
+                        <i class="bi bi-check-circle"></i>
+                        Tamamlanan
+                        <span class="badge bg-success ms-2">@Model.TamamlananGorevler.Count</span>
+                    </h5>
+                </div>
+                <div class="kanban-body">
+                    @foreach (var gorev in Model.TamamlananGorevler)
+                    {
+                        <div class="kanban-item completed" data-priority="@gorev.OncelikDurumu.ToString().ToLower()">
+                            <div class="priority-indicator"></div>
+                            <div class="kanban-item-content">
+                                <h6 class="mb-2">@gorev.Baslik</h6>
+                                <p class="small text-muted mb-2">@gorev.Aciklama</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge priority-badge">@gorev.OncelikDurumu</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-check"></i>
+                                        @gorev.OlusturulmaTarihi.ToString("dd.MM.yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .kanban-column {
+            background-color: #222221;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            height: calc(100vh - 180px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kanban-header {
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .kanban-body {
+            padding: 1rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .kanban-item {
+            background-color: #2a2a29;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .kanban-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .priority-indicator {
+            width: 4px;
+            background-color: #666;
+            margin-right: 0.75rem;
+        }
+
+        .kanban-item[data-priority="yüksek"] .priority-indicator {
+            background-color: #dc3545;
+        }
+
+        .kanban-item[data-priority="orta"] .priority-indicator {
+            background-color: #ffc107;
+        }
+
+        .kanban-item[data-priority="düşük"] .priority-indicator {
+            background-color: #0dcaf0;
+        }
+
+        .kanban-item-content {
+            flex: 1;
+        }
+
+        .priority-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .kanban-item[data-priority="yüksek"] .priority-badge {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .kanban-item[data-priority="orta"] .priority-badge {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .kanban-item[data-priority="düşük"] .priority-badge {
+            background-color: rgba(13, 202, 240, 0.2);
+            color: #0dcaf0;
+        }
+
+        .kanban-item.completed {
+            opacity: 0.7;
+        }
+
+        .kanban-item.completed .priority-indicator {
+            background-color: #198754;
+        }
+
+        /* Scrollbar Styling */
+        .kanban-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .kanban-body::-webkit-scrollbar-track {
+            background: #222221;
+            border-radius: 3px;
+        }
+
+        .kanban-body::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        .kanban-body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .kanban-item {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+} 
