@@ -24,6 +24,8 @@ Projemiz bir to do list uygulamasıdır
 
 ![image](https://github.com/user-attachments/assets/7a841fdb-4b10-4126-b252-a3b000c58b44) Bildirim ekranımız
 
+Detaylı bilgi için Youtube videomuz: https://www.youtube.com/watch?v=DvzbCo4E_nU
+
 Teşekkür Ederiz, iyi çalışmalar dileriz.
 
 Huzeyfe Sevim ve Avni Berka Daloğlu
